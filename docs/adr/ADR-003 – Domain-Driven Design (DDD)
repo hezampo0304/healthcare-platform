@@ -1,0 +1,318 @@
+# ADR-003: Domain-Driven Design (DDD)
+
+**Status**
+
+Accepted
+
+**Date**
+
+2026-06-30
+
+**Authors**
+
+Healthcare Platform Team
+
+---
+
+# Context
+
+Healthcare Platform is a business-driven system that models complex healthcare processes involving patients, doctors, appointments, prescriptions, pharmacy, billing and clinical workflows.
+
+As the platform evolves, the complexity of the business domain is expected to grow significantly.
+
+A consistent modeling strategy is required to ensure that business rules remain explicit, maintainable and independent from technical implementation details.
+
+---
+
+# Decision Drivers
+
+The selected modeling approach must provide:
+
+* Clear business language
+* High maintainability
+* Explicit business rules
+* Strong consistency
+* Technology independence
+* Scalability
+* Low coupling
+* High cohesion
+
+---
+
+# Options Considered
+
+## Anemic Domain Model
+
+Business rules are implemented inside services while entities only contain data.
+
+Advantages
+
+* Simple to implement.
+* Familiar to many developers.
+
+Disadvantages
+
+* Weak encapsulation.
+* Business logic becomes scattered.
+* Difficult to maintain.
+* Difficult to evolve.
+
+---
+
+## Rich Domain Model (DDD)
+
+Entities encapsulate both data and behavior.
+
+Advantages
+
+* Business rules remain close to the data.
+* Better encapsulation.
+* Easier maintenance.
+* Better readability.
+* Improved testability.
+
+Disadvantages
+
+* Higher learning curve.
+* Requires greater design discipline.
+
+---
+
+# Decision
+
+Healthcare Platform adopts **Domain-Driven Design (DDD)** using both Strategic Design and Tactical Design.
+
+The domain model is the center of the application.
+
+Business behavior must be implemented inside the domain whenever possible.
+
+Application services coordinate use cases but should not contain business rules.
+
+---
+
+# Strategic Design
+
+The platform is divided into the following bounded contexts:
+
+```text
+Healthcare Platform
+
+├── Identity Context
+
+├── Doctor Context
+
+├── Appointment Context
+
+├── Medical Context
+
+├── Pharmacy Context
+
+├── Inventory Context
+
+├── Billing Context
+
+├── Notification Context
+
+├── Reporting Context
+
+└── Audit Context
+```
+
+Each bounded context maps to an independent microservice.
+
+Each context owns:
+
+* Its own business model
+* Its own database
+* Its own API
+* Its own lifecycle
+
+No context may directly access another context's database.
+
+---
+
+# Tactical Design
+
+The following DDD building blocks are mandatory.
+
+## Entity
+
+Represents objects with identity.
+
+Examples:
+
+* User
+* Doctor
+* Patient
+* Appointment
+* Prescription
+
+Entities encapsulate behavior.
+
+Example:
+
+```java
+user.lock();
+user.unlock();
+user.incrementFailedAttempts();
+```
+
+---
+
+## Value Object
+
+Represents immutable concepts without identity.
+
+Examples:
+
+* Email
+* Password
+* UserId
+* AppointmentId
+* Money
+* Address
+
+Value Objects must be immutable.
+
+---
+
+## Aggregate
+
+Business consistency boundary.
+
+Every aggregate has exactly one Aggregate Root.
+
+External objects may only reference the Aggregate Root.
+
+---
+
+## Aggregate Root
+
+Controls all modifications inside the aggregate.
+
+Examples:
+
+* User
+* Appointment
+* Prescription
+
+---
+
+## Repository
+
+Repositories abstract persistence.
+
+Repositories are interfaces defined by the domain or application.
+
+Infrastructure provides the implementation.
+
+---
+
+## Domain Service
+
+Business behavior that does not naturally belong to a single entity.
+
+Domain Services must not contain infrastructure code.
+
+---
+
+## Domain Event
+
+Represents something important that happened inside the business domain.
+
+Examples:
+
+* UserAuthenticated
+* AppointmentCreated
+* PrescriptionIssued
+
+---
+
+# Ubiquitous Language
+
+Business terminology must remain consistent across:
+
+* Source code
+* Documentation
+* APIs
+* Database
+* Architecture diagrams
+
+Technical names should never replace business terminology.
+
+---
+
+# Rich Domain Model
+
+Healthcare Platform adopts a Rich Domain Model.
+
+Business behavior belongs inside entities.
+
+Preferred:
+
+```java
+user.changePassword(newPassword);
+appointment.cancel(reason);
+doctor.assignSchedule(schedule);
+```
+
+Avoid:
+
+```java
+user.setPassword(password);
+appointment.setStatus(CANCELLED);
+```
+
+---
+
+# Immutability
+
+Value Objects must be immutable.
+
+Entities should expose behavior rather than setters.
+
+Public setters are discouraged unless explicitly justified.
+
+---
+
+# Consequences
+
+Positive
+
+* Better business modeling.
+* Improved maintainability.
+* Easier testing.
+* Clearer business rules.
+* Better long-term scalability.
+
+Negative
+
+* More classes.
+* Additional abstractions.
+* Higher learning curve.
+* More design effort.
+
+---
+
+# Trade-offs
+
+The project intentionally favors explicit business modeling over rapid implementation.
+
+This increases the initial development effort but significantly improves maintainability as the platform grows.
+
+---
+
+# Future Considerations
+
+Future bounded contexts should follow the same modeling principles.
+
+Asynchronous communication between bounded contexts will be introduced through domain events without violating aggregate boundaries.
+
+---
+
+# Related ADRs
+
+* ADR-001 Monorepo Strategy
+* ADR-002 Clean Architecture
+* ADR-004 Spring Boot
+* ADR-008 Event-Driven Architecture
