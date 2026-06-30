@@ -1,0 +1,292 @@
+# ADR-002: Clean Architecture
+
+**Status**
+
+Accepted
+
+**Date**
+
+2026-06-30
+
+**Authors**
+
+Healthcare Platform Team
+
+---
+
+# Context
+
+Healthcare Platform is a long-term enterprise application composed of multiple independently deployable microservices.
+
+The platform is expected to evolve continuously while maintaining high maintainability, testability, scalability and technology independence.
+
+Each microservice will implement business capabilities such as Authentication, Identity Management, Appointment Scheduling, Medical Records, Pharmacy and Billing.
+
+To avoid tight coupling between business logic and technical frameworks, the project requires an architectural style that clearly separates business rules from infrastructure concerns.
+
+---
+
+# Decision Drivers
+
+The selected architecture must satisfy the following quality attributes:
+
+* High maintainability
+* High testability
+* Technology independence
+* Framework independence
+* Database independence
+* Low coupling
+* High cohesion
+* Scalability
+* Long-term maintainability
+* Ease of onboarding new developers
+
+---
+
+# Options Considered
+
+## Layered Architecture (N-Tier)
+
+### Advantages
+
+* Simple to understand
+* Widely adopted
+* Easy to start
+
+### Disadvantages
+
+* Business logic often leaks into controllers or persistence layers.
+* Strong dependency on frameworks.
+* Difficult to unit test in isolation.
+* High coupling between layers.
+
+---
+
+## Hexagonal Architecture
+
+### Advantages
+
+* Excellent separation of concerns.
+* Infrastructure independence.
+* Easy to replace adapters.
+* Highly testable.
+
+### Disadvantages
+
+* Does not explicitly organize application use cases.
+* Requires additional conventions to structure complex domains.
+
+---
+
+## Onion Architecture
+
+### Advantages
+
+* Strong dependency inversion.
+* Domain-centric design.
+* Technology independence.
+
+### Disadvantages
+
+* Less standardized across teams.
+* Can become difficult to organize as the project grows.
+
+---
+
+## Clean Architecture
+
+### Advantages
+
+* Clear separation between business rules and infrastructure.
+* Explicit application use cases.
+* Strong dependency inversion.
+* Highly testable.
+* Framework agnostic.
+* Easy to evolve.
+* Excellent fit for Domain-Driven Design.
+
+### Disadvantages
+
+* More initial boilerplate.
+* Additional abstractions.
+* Requires architectural discipline.
+
+---
+
+# Decision
+
+Healthcare Platform will adopt **Clean Architecture** as the standard architecture for every microservice.
+
+Business rules will always remain independent from:
+
+* Spring Boot
+* Databases
+* Messaging systems
+* REST controllers
+* Security frameworks
+* External APIs
+
+Frameworks and technologies are considered implementation details.
+
+Business logic must never depend directly on infrastructure.
+
+---
+
+# Architecture
+
+Each microservice will follow the same internal structure.
+
+```text
+                 REST API
+                     │
+              Controllers
+                     │
+             Application Layer
+             (Use Cases)
+                     │
+              Domain Layer
+     (Entities, Value Objects,
+      Domain Services, Ports)
+                     │
+         Infrastructure Layer
+(PostgreSQL, JWT, RabbitMQ, REST,
+ Flyway, Spring Security)
+```
+
+Dependencies always point inward.
+
+The Domain Layer has no dependencies on any external framework.
+
+---
+
+# Package Structure
+
+Every microservice must follow the same package organization.
+
+```text
+src/main/java
+└── com.healthcare.platform.auth
+    ├── application
+    │   ├── ports
+    │   └── usecase
+    │
+    ├── domain
+    │   ├── model
+    │   ├── service
+    │   ├── valueobject
+    │   └── exception
+    │
+    ├── infrastructure
+    │   ├── configuration
+    │   ├── persistence
+    │   ├── security
+    │   ├── messaging
+    │   └── client
+    │
+    └── entrypoint
+        ├── rest
+        ├── dto
+        └── mapper
+```
+
+This package structure is mandatory for every microservice.
+
+---
+
+# Dependency Rule
+
+The Dependency Rule is the fundamental principle of this architecture.
+
+Dependencies must always point toward the domain.
+
+Allowed direction:
+
+```text
+Controller
+      ↓
+Use Case
+      ↓
+Domain
+```
+
+Infrastructure implements interfaces defined by the application or domain.
+
+The domain never imports infrastructure classes.
+
+---
+
+# Testing Strategy
+
+Each architectural layer must be tested independently.
+
+* Domain: Unit Tests only
+* Application: Unit Tests with mocked ports
+* Infrastructure: Integration Tests
+* REST Controllers: API Tests
+
+Business rules must be executable without starting Spring Boot.
+
+---
+
+# Benefits
+
+Adopting Clean Architecture provides:
+
+* Framework independence
+* Easier testing
+* Better maintainability
+* Better readability
+* Lower coupling
+* Better scalability
+* Easier replacement of technologies
+* Clear separation of responsibilities
+
+---
+
+# Consequences
+
+Positive:
+
+* Consistent architecture across all services.
+* Easier onboarding.
+* High code quality.
+* Better long-term maintainability.
+* Simplified automated testing.
+
+Negative:
+
+* More project structure.
+* More interfaces.
+* Slightly higher learning curve.
+* More initial development effort.
+
+---
+
+# Trade-offs
+
+The project intentionally accepts additional architectural complexity in exchange for long-term maintainability and technology independence.
+
+Although small CRUD applications may not require this level of abstraction, Healthcare Platform is expected to evolve into a large enterprise ecosystem where these architectural boundaries provide significant long-term value.
+
+---
+
+# Future Considerations
+
+Future services may introduce:
+
+* CQRS
+* Event Sourcing
+* Saga Pattern
+* Outbox Pattern
+
+These patterns must integrate without violating the Clean Architecture dependency rules defined in this ADR.
+
+---
+
+# Related ADRs
+
+* ADR-001 Monorepo Strategy
+* ADR-003 Domain-Driven Design
+* ADR-004 Spring Boot
+* ADR-005 PostgreSQL
+* ADR-008 JWT Authentication
