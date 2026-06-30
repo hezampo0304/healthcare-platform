@@ -1,13 +1,17 @@
 package com.healthcare.platform.cli;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.healthcare.platform.cli.cli.commands.RootCommand;
+import picocli.CommandLine;
 
-@SpringBootApplication
 public class HcpCliApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(HcpCliApplication.class, args);
-	}
+  private HcpCliApplication() {
+    throw new IllegalStateException("Utility class");
+  }
 
+  public static void main(String[] args) {
+    int exitCode = new CommandLine(new RootCommand()).execute(args);
+
+    System.exit(exitCode);
+  }
 }
