@@ -6,8 +6,7 @@ import picocli.CommandLine;
     name = "hcp",
     mixinStandardHelpOptions = true,
     version = "0.1.0",
-    description = "Healthcare Platform Engineering CLI",
-    subcommands = {VersionCommand.class})
+    description = "Healthcare Platform Engineering CLI")
 public class RootCommand implements Runnable {
   @Override
   public void run() {

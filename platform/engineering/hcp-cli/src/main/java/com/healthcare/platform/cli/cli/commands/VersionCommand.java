@@ -15,7 +15,6 @@ public class VersionCommand implements Runnable {
     System.out.printf(
         """
                 %s
-
                 Version : %s
                 Java    : %s
                 Build   : %s
