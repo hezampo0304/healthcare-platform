@@ -24,8 +24,8 @@ public class GitChecker implements ToolChecker {
   @Override
   public ToolStatus check() {
     CommandResult versionResult = commandExecutor.execute("git", "--version");
-    if (versionResult.exitCode() != 0) {
-      return new ToolStatus(Tool.GIT, false, "", "GIT is not installed.");
+    if (versionResult.exitCode() == 0) {
+      return new ToolStatus(Tool.GIT, true, versionResult.stdout(), "GIT detected successfully.");
     }
 
     CommandResult daemonResult = commandExecutor.execute("git", "info");

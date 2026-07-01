@@ -25,6 +25,7 @@ public class DockerChecker implements ToolChecker {
   @Override
   public ToolStatus check() {
     CommandResult versionResult = commandExecutor.execute("docker", "--version");
+    System.out.println(versionResult);
     if (versionResult.exitCode() != 0) {
       return new ToolStatus(Tool.DOCKER, false, "", "Docker is not installed.");
     }

@@ -1,16 +1,9 @@
 package com.healthcare.platform.cli.configuration;
 
-import com.healthcare.platform.cli.application.checker.*;
-import com.healthcare.platform.cli.application.ports.output.CommandExecutorPort;
-import com.healthcare.platform.cli.application.ports.input.DoctorUseCase;
-import com.healthcare.platform.cli.application.usecase.RunDoctorUseCase;
-import com.healthcare.platform.cli.cli.commands.DoctorCommand;
 import com.healthcare.platform.cli.cli.commands.RootCommand;
 import com.healthcare.platform.cli.cli.commands.VersionCommand;
-import com.healthcare.platform.cli.infrastructure.filesystem.ProcessCommandExecutor;
+import com.healthcare.platform.cli.configuration.modules.DoctorModule;
 import picocli.CommandLine;
-
-import java.util.List;
 
 @CommandLine.Command(
         name = "hcp",
@@ -19,6 +12,8 @@ import java.util.List;
         description = "Healthcare Platform Engineering CLI"
 )
 public class ApplicationModule {
+    private final DoctorModule doctorModule =
+            new DoctorModule();
     public CommandLine commandLine() {
         CommandLine commandLine =
                 new CommandLine(rootCommand());
@@ -29,7 +24,7 @@ public class ApplicationModule {
 
         commandLine.addSubcommand(
                 "doctor",
-                doctorCommand());
+                doctorModule.doctorCommand());
 
         return commandLine;
     }
@@ -38,26 +33,5 @@ public class ApplicationModule {
         return new RootCommand();
     }
 
-    private DoctorCommand doctorCommand() {
-        return new DoctorCommand(doctorUseCase());
-    }
 
-    private DoctorUseCase doctorUseCase() {
-        return new RunDoctorUseCase(toolCheckers());
-    }
-
-    private List<ToolChecker> toolCheckers() {
-        CommandExecutorPort executor = commandExecutor();
-
-        return List.of(
-                new JavaChecker(executor),
-                new GitChecker(executor),
-                new GradleChecker(executor),
-                new DockerChecker(executor)
-        );
-    }
-
-    private CommandExecutorPort commandExecutor() {
-        return new ProcessCommandExecutor();
-    }
 }

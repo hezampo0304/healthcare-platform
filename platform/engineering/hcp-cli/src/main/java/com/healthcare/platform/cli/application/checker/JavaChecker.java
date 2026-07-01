@@ -24,8 +24,8 @@ public class JavaChecker implements ToolChecker {
   @Override
   public ToolStatus check() {
     CommandResult versionResult = commandExecutor.execute("java", "--version");
-    if (versionResult.exitCode() != 0) {
-      return new ToolStatus(Tool.JAVA, false, "", "Java is not installed.");
+    if (versionResult.exitCode() == 0) {
+      return new ToolStatus(Tool.JAVA, true, versionResult.stdout(), "Java detected successfully.");
     }
 
     CommandResult daemonResult = commandExecutor.execute("java", "info");

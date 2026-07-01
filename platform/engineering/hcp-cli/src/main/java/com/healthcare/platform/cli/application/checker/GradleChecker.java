@@ -25,19 +25,17 @@ public class GradleChecker implements ToolChecker {
   public ToolStatus check() {
     CommandResult versionResult = commandExecutor.execute("gradle", "--version");
     if (versionResult.exitCode() != 0) {
-      return new ToolStatus(Tool.GRADLE, false, "", "Gradle is not installed.");
-    }
-
-    CommandResult daemonResult = commandExecutor.execute("gradle", "info");
-    if (daemonResult.exitCode() != 0) {
       return new ToolStatus(
-          Tool.GRADLE,
-          false,
-          extractVersion(versionResult.stdout()),
-          "Gradle is installed but the Gradle daemon is not running.");
+              Tool.GRADLE,
+              false,
+              "",
+              "Gradle is not installed.");
     }
-
-    return new ToolStatus(Tool.GRADLE, true, extractVersion(versionResult.stdout()), "Installed");
+    return new ToolStatus(
+            Tool.GRADLE,
+            true,
+            extractVersion(versionResult.stdout()),
+            "Gradle detected successfully.");
   }
 
   private String extractVersion(String output) {
